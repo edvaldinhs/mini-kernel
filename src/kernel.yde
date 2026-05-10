@@ -1,0 +1,121 @@
+# kernel.yde
+# well, memory access and changes...
+
+# "cursor" position to print things
+# in different places
+int cursorpos = 0;
+int COLUMNS = 80;
+
+# funny int division cuz i've not
+# implemented '/' yet XD
+fun int divide(n: int, d: int): int {
+    int q = 0;
+    int run = 1;
+    while (run) {
+        if (n < d) then {
+            run = 0;
+        } else {
+            n = n - d;
+            q = q + 1;
+        };
+    };
+    q;
+}
+
+# write "nothing" and set a background
+fun paint(bgcolor: int): void {
+    char* vga = 0xB8000;
+    int offset = cursorpos * 2;
+
+    int fgcolor = 0; 
+    int attr = (bgcolor * 16) + fgcolor;
+
+    *(vga + offset) = 32;
+    *(vga + offset + 1) = attr;
+
+    cursorpos = cursorpos + 1;
+}
+
+# print a char into the cursor position
+fun putc(c: char): void {
+    char* vga = 0xB8000;
+
+    if (c < 11) then {
+        if (9 < c) then {
+             int currentRow = divide(cursorpos, COLUMNS);
+             cursorpos = (currentRow + 1) * COLUMNS;
+        } else {
+             int offset = cursorpos * 2;
+             *(vga + offset) = c;
+             *(vga + offset + 1) = 7;
+             cursorpos = cursorpos + 1;
+        };
+    } else {
+        int offset = cursorpos * 2;
+        *(vga + offset) = c;
+        *(vga + offset + 1) = 7;
+        cursorpos = cursorpos + 1;
+    };
+}
+
+fun clear(): void {
+    char* vga = 0xB8000;
+    int i = 0;
+
+    while (i < 2000) {
+        int offset = i * 2;
+        *(vga + offset) = 32;
+        *(vga + offset + 1) = 7;
+        i = i + 1;
+    };
+
+    cursorpos = 0;
+}
+
+# \n function
+fun newline(): void {
+    int currentRow = divide(cursorpos, COLUMNS);
+    cursorpos = (currentRow + 1) * COLUMNS;
+}
+
+# print entire strings
+fun printk(s: char*): void {
+    while (*s != 0) {
+        putc(*s);
+        s = s + 1;
+    };
+}
+
+# print all the colors
+fun printcolors(): void {
+  for int i = 0, i < 15, 1 in {
+      paint(i);
+    };
+}
+
+fun main(): void {
+    clear();
+
+    printk("Yde-OS !!!!!!!!!!");
+    newline();
+    printk("This is a prototype");
+    newline();
+    printk("XD");
+    newline();
+    printcolors();
+
+    newline();
+    newline();
+
+    # Hardcoded among us...
+    paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); newline();
+    paint(9); paint(9); paint(9); paint(9); paint(4); paint(4); newline();
+    paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); newline();
+    paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); newline();
+    paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); paint(4); newline();
+    paint(4); paint(4); paint(0); paint(0); paint(4); paint(4); newline();
+    paint(4); paint(4); paint(0); paint(0); paint(4); paint(4);
+
+    # Inline Assembly
+    asm("hlt", "");
+}
