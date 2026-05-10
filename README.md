@@ -73,7 +73,15 @@ Then use the remote-viewer
 ```bash
 $ remote-viewer vnc://127.0.0.1:5900
 ```
+<br>
 
+## Example
+
+After compiling, you should see something like this:
+
+<img width="908" alt="image" src="https://github.com/user-attachments/assets/7b92de0b-f993-4fa0-a1b8-2601178b665e" />
+
+<br>
 <br>
 
 ## 💻&nbsp; Project
